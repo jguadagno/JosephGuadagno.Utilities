@@ -13,7 +13,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JosephGuadagno.Utilities.Resources;
+using Microsoft.Data.Extensions;
 
 namespace JosephGuadagno.Utilities.Extensions.EF
 {

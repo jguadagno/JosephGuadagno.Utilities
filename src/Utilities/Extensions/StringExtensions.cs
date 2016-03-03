@@ -104,7 +104,7 @@ namespace JosephGuadagno.Utilities.Extensions
         /// <returns></returns>
         public static string ReplaceBreaksWithBR(this string input)
         {
-            return String.Join("<br/>", input.ToLineArray());
+            return string.Join("<br/>", input.ToLineArray());
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace JosephGuadagno.Utilities.Extensions
             var result = new T?();
             try
             {
-                if (!String.IsNullOrEmpty(source) && source.Trim().Length > 0)
+                if (!string.IsNullOrEmpty(source) && source.Trim().Length > 0)
                 {
                     var converter = TypeDescriptor.GetConverter(typeof(T));
                     result = (T?)converter.ConvertFrom(source);
@@ -310,6 +310,20 @@ namespace JosephGuadagno.Utilities.Extensions
         public static string ToDbString(this string value)
         {
             return value ?? "NULL";
+        }
+        
+        /// <summary>
+		/// This removes characters that are invalid for xml encoding
+		/// </summary>
+		/// <param name="text">Text to be encoded.</param>
+		/// <returns>Text with invalid xml characters removed.</returns>
+		public static string ToSafeForXml(this string text)
+        {
+            // From xml spec valid chars:
+            // #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]    
+            // any Unicode character, excluding the surrogate blocks, FFFE, and FFFF.
+            const string regularExpression = @"[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD\x10000-x10FFFF]";
+            return Regex.Replace(text, regularExpression, "");
         }
     }
 }

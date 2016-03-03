@@ -1,4 +1,6 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
+using JosephGuadagno.Utilities.Security;
 
 namespace JosephGuadagno.Utilities.Web
 {
@@ -16,10 +18,8 @@ namespace JosephGuadagno.Utilities.Web
             if (context != null)
             {
                 //Formatting the fully qualified website url/name
-                appPath = string.Format("{0}://{1}{2}",
-                    context.Request.Url.Scheme,
-                    context.Request.Url.Host,
-                    context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port);
+                appPath =
+                    $"{context.Request.Url.Scheme}://{context.Request.Url.Host}{(context.Request.Url.Port == 80 ? string.Empty : ":" + context.Request.Url.Port)}";
             }
 
             return appPath;
@@ -31,12 +31,12 @@ namespace JosephGuadagno.Utilities.Web
             HttpContext context = HttpContext.Current;
 
             //Checking the current context content
-            if (context != null)
-            {
+            if (context == null) return null;
+
+            if (HttpRuntime.AppDomainAppVirtualPath != null)
                 return context.Request.Url.Host != "localhost"
                     ? VirtualPathUtility.ToAbsolute(url).Replace(HttpRuntime.AppDomainAppVirtualPath, "")
                     : VirtualPathUtility.ToAbsolute(url);
-            }
             return null;
         }
 
@@ -45,12 +45,32 @@ namespace JosephGuadagno.Utilities.Web
             return FullyQualifiedApplicationPath() + FixupUrl(url);
         }
 
-        public static int ParseRequestParam(string parameter)
+        public static string GetHashedParameterUrl(string page, string idFieldName, string hashFieldName, int id)
         {
-            if (string.IsNullOrEmpty(parameter)) return 0;
-            int test;
-            int.TryParse(parameter, out test);
-            return test;
+            var parameters = Hash.GetHashedParameter(idFieldName, hashFieldName, id);
+            return $"{GetAbsolutePath(page)}?{parameters}";
+        }
+
+        public static string GetUrl(string page, string parameter, int id)
+        {
+            return GetUrl(page, parameter, id.ToString());
+        }
+
+        public static string GetUrl(string page, string parameter, string id)
+        {
+            return $"{GetAbsolutePath(page)}?{parameter}={id}";
+        }
+
+        private static string GetAbsolutePath(string page, string defaultRoot = null)
+        {
+            try
+            {
+                return VirtualPathUtility.ToAbsolute(page);
+            }
+            catch (Exception)
+            {
+                return page.Replace("~", defaultRoot);
+            }
         }
     }
 }

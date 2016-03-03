@@ -5,7 +5,7 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Core.Objects.DataClasses;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using JosephGuadagno.Utilities.Resources;
+using Microsoft.Data.Extensions;
 
 namespace JosephGuadagno.Utilities.Extensions.EF
 {

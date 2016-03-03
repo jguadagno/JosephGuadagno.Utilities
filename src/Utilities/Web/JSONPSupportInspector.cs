@@ -15,22 +15,22 @@ namespace JosephGuadagno.Utilities.Web
         // charset negotiation, so this needs to be more
         // sophisticated (and per-request) if clients will 
         // use multiple charsets
-        private static readonly Encoding encoding = Encoding.UTF8;
+        private static readonly Encoding Encoding = Encoding.UTF8;
 
         private class Writer : BodyWriter
         {
-            private readonly string content;
+            private readonly string _content;
 
             public Writer(string content)
                 : base(false)
             {
-                this.content = content;
+                _content = content;
             }
 
             protected override void OnWriteBodyContents(XmlDictionaryWriter writer)
             {
                 writer.WriteStartElement("Binary");
-                byte[] buffer = encoding.GetBytes(content);
+                byte[] buffer = Encoding.GetBytes(_content);
                 writer.WriteBase64(buffer, 0, buffer.Length);
                 writer.WriteEndElement();
             }
@@ -72,24 +72,23 @@ namespace JosephGuadagno.Utilities.Web
 
         public void BeforeSendReply(ref Message reply, object correlationState)
         {
-            if (correlationState != null && correlationState is string)
-            {
-                // if we have a JSONP callback then buffer the response, wrap it with the
-                // callback call and then re-create the response message
+            var s = correlationState as string;
+            if (s == null) return;
+            // if we have a JSONP callback then buffer the response, wrap it with the
+            // callback call and then re-create the response message
 
-                string callback = (string) correlationState;
+            string callback = s;
 
-                XmlDictionaryReader reader = reply.GetReaderAtBodyContents();
-                reader.ReadStartElement();
-                string content = encoding.GetString(reader.ReadContentAsBase64());
+            XmlDictionaryReader reader = reply.GetReaderAtBodyContents();
+            reader.ReadStartElement();
+            string content = Encoding.GetString(reader.ReadContentAsBase64());
 
-                content = callback + "(" + content + ")";
+            content = callback + "(" + content + ")";
 
-                Message newreply = Message.CreateMessage(MessageVersion.None, "", new Writer(content));
-                newreply.Properties.CopyProperties(reply.Properties);
+            Message newreply = Message.CreateMessage(MessageVersion.None, "", new Writer(content));
+            newreply.Properties.CopyProperties(reply.Properties);
 
-                reply = newreply;
-            }
+            reply = newreply;
         }
 
         #endregion
