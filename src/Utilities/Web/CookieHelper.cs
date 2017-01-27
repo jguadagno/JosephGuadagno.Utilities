@@ -50,7 +50,7 @@ namespace JosephGuadagno.Utilities.Web
             if (HttpContext.Current != null)
             {
                 HttpCookie cookie = new HttpCookie(cookieName, string.Empty)
-                {HttpOnly = true, Expires = DateTime.Now.AddYears(-5)};
+                    {HttpOnly = true, Expires = DateTime.Now.AddYears(-5)};
                 HttpContext.Current.Response.Cookies.Add(cookie);
             }
         }

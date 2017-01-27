@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using DDay.iCal;
-using DDay.iCal.Serialization.iCalendar;
-using JosephGuadagno.Utilities.Extensions;
+using Ical.Net;
+using Ical.Net.DataTypes;
+using Ical.Net.Serialization.iCalendar.Serializers;
 using JosephGuadagno.Utilities.Interfaces;
 
 namespace JosephGuadagno.Utilities.Web.Syndication
 {
     /// <summary>
-    ///     Generates the <c>iCal</c> and VCS files.
+    ///     Generates the <c>calendar</c> and VCS files.
     /// </summary>
     public class Calendar
     {
@@ -29,47 +29,48 @@ namespace JosephGuadagno.Utilities.Web.Syndication
         public static void GenerateCalendar(ICalendarItem calendarItem, HttpContext context,
             string timeZoneToUse = DefaultTimeZone)
         {
-            iCalendar iCal = GetiCalendarInstance(timeZoneToUse);
+            var calendar = GetCalendarInstance(timeZoneToUse);
 
             string fileName = $"{GetSafeFilename(calendarItem.Name)}.vcs";
-            AppendEventToCalendar(calendarItem, iCal, timeZoneToUse);
-            OutputIcsFile(iCal, context, fileName);
+            AppendEventToCalendar(calendarItem, calendar, timeZoneToUse);
+            OutputIcsFile(calendar, context, fileName);
         }
 
         public static void GenerateCalendar(IEnumerable<ICalendarItem> items, HttpContext context,
             string timeZoneToUse = DefaultTimeZone)
         {
-            iCalendar iCal = GetiCalendarInstance(timeZoneToUse);
+            var calendar = GetCalendarInstance(timeZoneToUse);
 
-            items.ForEach(item => AppendEventToCalendar(item, iCal, timeZoneToUse));
-            OutputIcsFile(iCal, context);
-        }
-
-        private static iCalendar GetiCalendarInstance(string timeZoneToUse)
-        {
-            iCalendar iCal = new iCalendar
+            foreach (var calendarItem in items)
             {
-                ProductID = "-//josephguadagno.net//NONSGML josephguadagno.net//EN"
-            };
-            iCal.AddChild(iCal.GetTimeZone(timeZoneToUse));
-
-            return iCal;
+                AppendEventToCalendar(calendarItem, calendar, timeZoneToUse);
+            }
+            OutputIcsFile(calendar, context);
         }
 
-        private static void AppendEventToCalendar(ICalendarItem calendarItem, iCalendar iCal, string timeZoneToUse)
+        private static Ical.Net.Calendar GetCalendarInstance(string timeZoneToUse)
         {
-            Event calEvent = iCal.Create<Event>();
+            var calendar = new Ical.Net.Calendar();
+            calendar.AddTimeZone(new VTimeZone(timeZoneToUse));
+            return calendar;
+        }
+
+        private static void AppendEventToCalendar(ICalendarItem calendarItem, Ical.Net.Calendar calendar,
+            string timeZoneToUse)
+        {
+            Event calEvent = calendar.Create<Event>();
             calEvent.Summary = calendarItem.Summary;
             calEvent.Description = calendarItem.Description;
-            calEvent.Start = new iCalDateTime(calendarItem.StartDate, timeZoneToUse);
-            calEvent.End = new iCalDateTime(calendarItem.EndDate, timeZoneToUse);
+            calEvent.Start = new CalDateTime(calendarItem.StartDate, timeZoneToUse);
+            calEvent.End = new CalDateTime(calendarItem.EndDate, timeZoneToUse);
             calEvent.Status = calendarItem.Status == "Confirmed" ? EventStatus.Confirmed : EventStatus.Tentative;
             calEvent.GeographicLocation = new GeographicLocation(calendarItem.Latitude, calendarItem.Longitude);
             calEvent.Location = calendarItem.Location ?? "";
             calEvent.Organizer = new Organizer(calendarItem.Organizer);
         }
 
-        private static void OutputIcsFile(iCalendar icalData, HttpContext context, string filename = "calendar.ics")
+        private static void OutputIcsFile(Ical.Net.Calendar calendarData, HttpContext context,
+            string filename = "calendar.ics")
         {
             HttpResponse response = context.Response;
             response.Clear();
@@ -79,8 +80,8 @@ namespace JosephGuadagno.Utilities.Web.Syndication
             response.Charset = "utf-8";
             string header = $"attachment;filename=\"{filename}\"";
             response.AddHeader("Content-Disposition", header);
-            iCalendarSerializer serializer = new iCalendarSerializer();
-            response.Write(serializer.SerializeToString(icalData));
+            CalendarSerializer serializer = new CalendarSerializer();
+            response.Write(serializer.SerializeToString(calendarData));
             response.End();
         }
 

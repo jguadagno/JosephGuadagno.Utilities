@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
@@ -16,11 +15,11 @@ namespace JosephGuadagno.Utilities.Security
         /// </summary>
         public enum HashType
         {
-            MD5,
-            SHA1,
-            SHA256,
-            SHA384,
-            SHA512
+            Md5,
+            Sha1,
+            Sha256,
+            Sha384,
+            Sha512
         }
 
         /// <summary>
@@ -91,19 +90,19 @@ namespace JosephGuadagno.Utilities.Security
             // Initialize appropriate hashing algorithm class.
             switch (hashType)
             {
-                case HashType.SHA1:
+                case HashType.Sha1:
                     hash = new SHA1Managed();
                     break;
 
-                case HashType.SHA256:
+                case HashType.Sha256:
                     hash = new SHA256Managed();
                     break;
 
-                case HashType.SHA384:
+                case HashType.Sha384:
                     hash = new SHA384Managed();
                     break;
 
-                case HashType.SHA512:
+                case HashType.Sha512:
                     hash = new SHA512Managed();
                     break;
 
@@ -222,12 +221,13 @@ namespace JosephGuadagno.Utilities.Security
         ///     Converts an integer to a hash value
         /// </summary>
         /// <param name="id">The id.</param>
+        /// <param name="saltWith">The string to use as the salt value</param>
         /// <returns></returns>
-        public static string IntToHash(int id)
+        public static string IntToHash(int id, string saltWith)
         {
             // Need to get the get the hash code
-            byte[] salt = StringToByte(ConfigurationManager.AppSettings["salt"]);
-            Hash hash = ComputeHash(id.ToString(), HashType.SHA512, salt);
+            byte[] salt = StringToByte(saltWith);
+            Hash hash = ComputeHash(id.ToString(), HashType.Sha512, salt);
 
             // UrlEncode the string
             return HttpUtility.UrlEncode(hash.HashToBase64);
@@ -238,12 +238,13 @@ namespace JosephGuadagno.Utilities.Security
         /// </summary>
         /// <param name="hashCode">The hash code.</param>
         /// <param name="id">The id.</param>
+        /// <param name="saltWith">The string to use as the salt value</param>
         /// <returns></returns>
-        public static bool IntMatchesHash(string hashCode, int id)
+        public static bool IntMatchesHash(string hashCode, int id, string saltWith)
         {
-            byte[] salt = StringToByte(ConfigurationManager.AppSettings["salt"]);
+            byte[] salt = StringToByte(saltWith);
 
-            return VerifyHash(hashCode, id.ToString(), HashType.SHA512, salt);
+            return VerifyHash(hashCode, id.ToString(), HashType.Sha512, salt);
         }
 
         /// <summary>
@@ -252,16 +253,23 @@ namespace JosephGuadagno.Utilities.Security
         /// <param name="idFieldName">Name of the id field.</param>
         /// <param name="hashFieldName">Name of the hash field.</param>
         /// <param name="id">The id.</param>
+        /// <param name="saltWith">The string to use as the salt value</param>
         /// <returns></returns>
-        public static string GetHashedParameter(string idFieldName, string hashFieldName, int id)
+        public static string GetHashedParameter(string idFieldName, string hashFieldName, int id, string saltWith)
         {
-            return $"{idFieldName}={id}&{hashFieldName}={IntToHash(id)}";
+            return $"{idFieldName}={id}&{hashFieldName}={IntToHash(id, saltWith)}";
         }
 
-        public static string GetUrlEncodedHash(string text, string salt)
+        /// <summary>
+        /// Returns a Base64 encoded hased string
+        /// </summary>
+        /// <param name="text">The text to encrypt</param>
+        /// <param name="saltWith">The string to use as the salt</param>
+        /// <returns></returns>
+        public static string GetUrlEncodedHash(string text, string saltWith)
         {
-            byte[] byteSalt = StringToByte(salt);
-            Hash hash = ComputeHash(text, HashType.SHA512, byteSalt);
+            var byteSalt = StringToByte(saltWith);
+            var hash = ComputeHash(text, HashType.Sha512, byteSalt);
 
             // UrlEncode the string
             return HttpUtility.UrlEncode(hash.HashToBase64);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ServiceModel.Syndication;
 using System.Text;
 using System.Xml;
-using JosephGuadagno.Utilities.Extensions;
 using JosephGuadagno.Utilities.Interfaces;
 using JosephGuadagno.Utilities.Web.Syndication.Geo;
 
@@ -51,7 +50,11 @@ namespace JosephGuadagno.Utilities.Web.Syndication
         public static SyndicationFeed GetFeed(SyndicationHeader header, IEnumerable<IGeoItem> items)
         {
             RssData rssData = new RssData(header);
-            items.ForEach(item => rssData.AddPoint(item));
+
+            foreach (var geoItem in items)
+            {
+                rssData.AddPoint(geoItem);
+            }
             return RssFeedBuilder.GetFeed(rssData);
         }
 

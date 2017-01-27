@@ -29,12 +29,12 @@ namespace JosephGuadagno.Utilities.GeoRSS
     {
         private static readonly Dictionary<Type, Func<GeoRssItem, SyndicationItem>> Formatters = new Dictionary
             <Type, Func<GeoRssItem, SyndicationItem>>
-        {
-            {typeof (GeoRssLineItem), i => GetLineItem((i as GeoRssLineItem))},
-            {typeof (GeoRssPointItem), i => GetPointItem((i as GeoRssPointItem))},
-            {typeof (GeoRssPolygonItem), i => GetPolygonItem(i as GeoRssPolygonItem)},
-            {typeof (GeoRssItem), i => GetItem(i)}
-        };
+            {
+                {typeof(GeoRssLineItem), i => GetLineItem((i as GeoRssLineItem))},
+                {typeof(GeoRssPointItem), i => GetPointItem((i as GeoRssPointItem))},
+                {typeof(GeoRssPolygonItem), i => GetPolygonItem(i as GeoRssPolygonItem)},
+                {typeof(GeoRssItem), i => GetItem(i)}
+            };
 
         private GeoRssFeedBuilder()
         {

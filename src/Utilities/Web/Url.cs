@@ -45,9 +45,10 @@ namespace JosephGuadagno.Utilities.Web
             return FullyQualifiedApplicationPath() + FixupUrl(url);
         }
 
-        public static string GetHashedParameterUrl(string page, string idFieldName, string hashFieldName, int id)
+        public static string GetHashedParameterUrl(string page, string idFieldName, string hashFieldName, int id,
+            string saltWith)
         {
-            var parameters = Hash.GetHashedParameter(idFieldName, hashFieldName, id);
+            var parameters = Hash.GetHashedParameter(idFieldName, hashFieldName, id, saltWith);
             return $"{GetAbsolutePath(page)}?{parameters}";
         }
 

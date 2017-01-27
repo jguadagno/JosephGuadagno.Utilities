@@ -13,12 +13,12 @@ namespace JosephGuadagno.Utilities.Web.Syndication.Geo
     {
         private static readonly Dictionary<Type, Func<IGeoItem, SyndicationItem>> Formatters = new Dictionary
             <Type, Func<IGeoItem, SyndicationItem>>
-        {
-            {typeof (RssLineItem), i => GetLineItem((i as RssLineItem))},
-            {typeof (RssPointItem), i => GetPointItem((i as RssPointItem))},
-            {typeof (RssPolygonItem), i => GetPolygonItem(i as RssPolygonItem)},
-            {typeof (RssItem), i => GetItem(i as RssItem)}
-        };
+            {
+                {typeof(RssLineItem), i => GetLineItem((i as RssLineItem))},
+                {typeof(RssPointItem), i => GetPointItem((i as RssPointItem))},
+                {typeof(RssPolygonItem), i => GetPolygonItem(i as RssPolygonItem)},
+                {typeof(RssItem), i => GetItem(i as RssItem)}
+            };
 
 
         public static SyndicationFeed GetFeed(RssData builder)
